@@ -1,0 +1,25 @@
+/* src/index.css */
+
+/* Step A: Import all of Tailwind's styles and utilities */
+@import "tailwindcss";
+
+/* Step B: Configure your theme directly here using the @theme directive */
+@theme {
+  /* This is where you'd put your custom values from our design brief */
+  --color-background: #F5F0E6; /* Our Warm Off-White */
+  --color-foreground: #2C2521; /* Our Espresso Brown */
+
+  /* This 'primary' variable will generate bg-primary, text-primary, border-primary, etc. */
+  --color-primary: #D37A54; /* Our Terracotta Accent */
+
+  /* You can also define breakpoints, fonts, etc. */
+  --font-sans: "Inter", sans-serif;
+  --font-serif: "Lora", serif;
+}
+
+/* You can still add custom CSS layers and classes if needed */
+@layer base {
+  h1, h2, h3 {
+    font-family: var(--font-serif);
+  }
+}
