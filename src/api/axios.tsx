@@ -3,7 +3,7 @@ import axios from 'axios';
 import { store } from '@/app/store'; // <-- Import the Redux store
 
 const apiClient = axios.create({
-    baseURL: 'http://44.201.140.9/api',
+    baseURL: import.meta.env.VITE_API_BASE_URL,
     headers: {
         'Content-Type': 'application/json',
     },
