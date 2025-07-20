@@ -1,45 +1,63 @@
+import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchProducts } from '../api/products';
 import { ProductCard } from '../components/shared/ProductCard';
 import { ProductPagination } from '../components/shared/ProductPagination';
 import { Input } from "@/components/ui/input";
-import { useDebounce } from '@/hooks/useDebounce'; // <-- Use our custom hook
-import { useState, useRef } from "react";
+import { useDebounce } from '@/hooks/useDebounce';
+import { Loader2 } from 'lucide-react';
 
 export function ProductsPage() {
     const [page, setPage] = useState(0);
     const [keyword, setKeyword] = useState("");
-    const debouncedKeyword = useDebounce(keyword, 500); // Debounce the keyword
+    const debouncedKeyword = useDebounce(keyword, 500);
 
-    // Correctly type the ref for an HTML Input Element
-    const inputRef = useRef<HTMLInputElement>(null);
+    const [isSlowLoading, setIsSlowLoading] = useState(false);
 
     const { data, isLoading, isError, error, isPlaceholderData } = useQuery({
-        // The queryKey now correctly uses the debounced keyword
         queryKey: ['products', page, debouncedKeyword],
-
-        // The queryFn now correctly passes the debounced keyword
         queryFn: () => fetchProducts({ page, keyword: debouncedKeyword }),
-
-        // This is the correct property name for TanStack Query v5
         placeholderData: (previousData) => previousData,
     });
 
-    // Handle loading state
-    if (isLoading) {
-        return <div className="text-center">Loading products...</div>;
-    }
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isLoading) {
+            // After 3 seconds, assume it's a cold start
+            timer = setTimeout(() => {
+                setIsSlowLoading(true);
+            }, 3000);
+        } else {
+            // If loading finishes, cancel the timer and hide the message
+            setIsSlowLoading(false);
+        }
 
-    // Handle error state
-    if (isError) {
+        // Cleanup function to clear the timer if the component unmounts
+        return () => clearTimeout(timer);
+
+    }, [isLoading]);
+
+
+    if (isLoading) {
         return (
-            <div className="text-center text-red-500">
-                Error fetching products: {error.message}
+            <div className="text-center py-20">
+                <Loader2 className="mx-auto h-12 w-12 animate-spin text-[#D37A54] mb-4" />
+                {isSlowLoading ? (
+                    <>
+                        <h2 className="text-xl font-semibold">Waking up the roaster...</h2>
+                        <p className="text-muted-foreground">Our free-tier server is starting up. Please wait a moment!</p>
+                    </>
+                ) : (
+                    <h2 className="text-xl font-semibold">Loading Products...</h2>
+                )}
             </div>
         );
     }
 
-    // This robust check ensures `data` is defined for the rest of the component
+    if (isError) {
+        return <div className="text-center text-red-500">Error fetching products: {error.message}</div>;
+    }
+
     if (!data) {
         return <div className="text-center">No products found.</div>;
     }
@@ -50,7 +68,6 @@ export function ProductsPage() {
                 <h1 className="text-3xl font-bold">Shop All Coffee</h1>
                 <div className="w-full max-w-xs">
                     <Input
-                        ref={inputRef}
                         placeholder="Search for a coffee..."
                         value={keyword}
                         onChange={(e) => setKeyword(e.target.value)}
@@ -58,9 +75,8 @@ export function ProductsPage() {
                 </div>
             </div>
 
-            {/* Conditionally render based on whether we have content */}
             {data.content.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md-grid-cols-2 lg-grid-cols-3 gap-8">
                     {data.content.map((product: any) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
@@ -76,7 +92,6 @@ export function ProductsPage() {
                     page={page}
                     totalPages={data.totalPages}
                     setPage={setPage}
-                    // Pass the loading status to the pagination component
                     isPlaceholderData={isPlaceholderData}
                 />
             </div>
