@@ -5,13 +5,36 @@ import { ProductCard } from "@/components/shared/ProductCard";
 import { useQuery } from "@tanstack/react-query";
 import { fetchProducts } from "@/api/products";
 import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Loader2 } from "lucide-react";
 
 export function HomePage() {
-    // We can reuse our fetchProducts function to get a few products for the homepage
+    // State to track if the load is taking a while
+    const [isSlowLoading, setIsSlowLoading] = useState(false);
+
+    // Fetch just 3 products for the "Featured Blends" section
     const { data: productsData, isLoading } = useQuery({
         queryKey: ['featured-products'],
-        queryFn: () => fetchProducts({ page: 0, size: 3 }), // Fetch just 3 products
+        queryFn: () => fetchProducts({ page: 0, size: 3 }),
     });
+
+    // useEffect to manage the slow loading message timer
+    useEffect(() => {
+        let timer: NodeJS.Timeout;
+        if (isLoading) {
+            // After 3 seconds, if still loading, assume it's a cold start
+            timer = setTimeout(() => {
+                setIsSlowLoading(true);
+            }, 3000);
+        } else {
+            // If loading finishes, cancel the timer and hide the message
+            setIsSlowLoading(false);
+        }
+
+        // Cleanup function to clear the timer if the component unmounts
+        return () => clearTimeout(timer);
+
+    }, [isLoading]); // Re-run this effect whenever isLoading changes
 
     return (
         <div className="space-y-16">
@@ -28,11 +51,21 @@ export function HomePage() {
                 </Button>
             </section>
 
-            {/* Featured Blends Section */}
             <section>
                 <h2 className="text-3xl font-bold text-center mb-8">Featured Blends</h2>
                 {isLoading ? (
-                    <div className="text-center">Loading...</div>
+                    // Use the same conditional loading message component here
+                    <div className="text-center py-10">
+                        <Loader2 className="mx-auto h-10 w-10 animate-spin text-[#D37A54] mb-4" />
+                        {isSlowLoading ? (
+                            <>
+                                <h2 className="text-lg font-semibold">Waking up the roaster...</h2>
+                                <p className="text-muted-foreground text-sm">Our server is starting up. Please wait a moment!</p>
+                            </>
+                        ) : (
+                            <h2 className="text-lg font-semibold">Loading Featured Coffee...</h2>
+                        )}
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                         {productsData?.content.map((product: any) => (
@@ -42,7 +75,6 @@ export function HomePage() {
                 )}
             </section>
 
-            {/* Brewing Guides Section */}
             <section>
                 <h2 className="text-3xl font-bold text-center mb-12">Brewing Guides & Tips</h2>
                 <div className="space-y-10">
@@ -54,9 +86,7 @@ export function HomePage() {
                             <Button asChild variant="outline">
                                 <Link to="/guides/pour-over">Read More</Link>
                             </Button>
-
                         </div>
-                        {/* --- UPDATED IMAGE --- */}
                         <div className="bg-gray-100 h-64 rounded-lg">
                             <img
                                 src="/images/Pour-Over.jpg"
@@ -65,9 +95,7 @@ export function HomePage() {
                             />
                         </div>
                     </div>
-                    {/* Guide: French Press */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                        {/* --- UPDATED IMAGE --- */}
                         <div className="bg-gray-100 h-64 rounded-lg md:order-last">
                             <img
                                 src="/images/French-Press.jpg"
@@ -81,7 +109,6 @@ export function HomePage() {
                             <Button asChild variant="outline">
                                 <Link to="/guides/french-press">Read More</Link>
                             </Button>
-
                         </div>
                     </div>
                 </div>
