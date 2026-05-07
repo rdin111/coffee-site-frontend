@@ -12,7 +12,9 @@ interface Message {
 
 export function AiChatWidget() {
     const [isOpen, setIsOpen] = useState(false);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messages, setMessages] = useState<Message[]>([
+        { role: 'model', parts: [{ text: "Welcome to The Grind! I'm your personal coffee sommelier. I can recommend the perfect roast based on your taste, or help you add items directly to your cart. What are you looking for today?" }] }
+    ]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [products, setProducts] = useState<any[]>([]);
@@ -62,12 +64,17 @@ export function AiChatWidget() {
         const payload = {
             systemInstruction: { 
                 parts: [{ 
-                    text: `You are an expert coffee barista and sommelier for "The Grind". 
-Be conversational, brief, and extremely helpful. 
-Here is our current product catalog:
-${catalog}
+                    text: `You are an expert coffee barista and sommelier for "The Grind" artisan coffee roasters. 
+Your goal is to proactively help customers find the perfect coffee, educate them on flavor profiles, and assist with purchases. Keep responses conversational and concise.
 
-When a user asks to buy something or add it to their cart, YOU MUST USE the add_to_cart tool. Do NOT tell them to add it themselves.` 
+CRITICAL RULES:
+1. ALWAYS stay on topic. You ONLY discuss coffee, brewing methods, and products from The Grind. Politely decline unrelated topics.
+2. Be proactive! Ask follow-up questions to narrow down their taste. If suggesting a coffee, briefly explain WHY it matches their taste.
+3. NEVER show or mention the product "ID" to the user. The ID is strictly for your internal use when calling tools. Instead of "Brazilian Bourbon (ID: 27)", just say "Brazilian Bourbon".
+4. When a user explicitly asks to buy something or add it to their cart, YOU MUST USE the add_to_cart tool immediately. Do not ask them to do it themselves.
+
+Here is our current product catalog:
+${catalog}` 
                 }] 
             },
             contents: history,
@@ -154,15 +161,6 @@ When a user asks to buy something or add it to their cart, YOU MUST USE the add_
 
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4">
-                    {messages.length === 0 && (
-                        <div className="text-center text-[var(--color-text-muted)] mt-12 px-4">
-                            <Bot className="h-10 w-10 mx-auto mb-4 opacity-40" />
-                            <p className="text-sm font-sans">
-                                Welcome to The Grind! Tell me what flavors you enjoy, or just ask me to add your favorite roast to the cart.
-                            </p>
-                        </div>
-                    )}
-                    
                     {/* Only render text parts, ignore invisible function calls */}
                     {messages.map((msg, i) => {
                         const textPart = msg.parts.find(p => p.text);
