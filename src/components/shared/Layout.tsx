@@ -2,6 +2,7 @@ import { Header } from "@/components/shared/Header.tsx";
 import { Footer } from "@/components/shared/Footer.tsx";
 import { Outlet } from "react-router-dom";
 import { Toaster } from 'react-hot-toast';
+import { AiChatWidget } from "./AiChatWidget";
 
 export function Layout() {
     return (
@@ -31,6 +32,7 @@ export function Layout() {
                 <Outlet />
             </main>
             <Footer />
+            <AiChatWidget />
         </div>
     );
 }
