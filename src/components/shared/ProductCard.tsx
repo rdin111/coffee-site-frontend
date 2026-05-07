@@ -31,7 +31,6 @@ export const ProductCard = React.memo(function ProductCard({ product }: ProductC
                 <img
                     src={product.imageUrl || 'https://placehold.co/400'}
                     alt={product.name}
-                    loading="lazy"
                     decoding="async"
                     width={400}
                     height={400}

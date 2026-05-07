@@ -60,6 +60,8 @@ export function HomePage() {
                     <img
                         src="/images/coffeebean.webp"
                         alt="Premium coffee beans"
+                        fetchPriority="high"
+                        loading="eager"
                         className="w-full h-full object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-[var(--color-background)]/70 via-[var(--color-background)]/50 to-[var(--color-background)]" />
@@ -194,7 +196,7 @@ export function HomePage() {
                                 <img
                                     src="/images/Pour-Over.webp"
                                     alt="Pour-over coffee setup"
-                                    loading="lazy"
+                                    loading="eager"
                                     decoding="async"
                                     className="w-full h-full object-cover"
                                 />
@@ -207,7 +209,7 @@ export function HomePage() {
                                 <img
                                     src="/images/French-Press.webp"
                                     alt="French press coffee maker"
-                                    loading="lazy"
+                                    loading="eager"
                                     decoding="async"
                                     className="w-full h-full object-cover"
                                 />
@@ -241,7 +243,7 @@ export function HomePage() {
                     <img
                         src="/images/storybeans.webp"
                         alt="Coffee beans being roasted"
-                        loading="lazy"
+                        loading="eager"
                         decoding="async"
                         className="w-full h-80 md:h-96 object-cover"
                     />
