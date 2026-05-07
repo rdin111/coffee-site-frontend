@@ -21,8 +21,9 @@ export function LoginForm() {
 
     const mutation = useMutation({
         mutationFn: loginUser,
-        onSuccess: (token) => {
-            dispatch(setCredentials({ token }));
+        onSuccess: (token, variables) => {
+            // Store both the token and the username used to log in
+            dispatch(setCredentials({ token, username: variables.username }));
             toast.success("Login successful!");
             navigate('/');
         },

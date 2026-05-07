@@ -14,8 +14,29 @@ interface CartState {
     items: CartItem[];
 }
 
+// Load cart from localStorage for persistence across sessions
+const loadCartFromStorage = (): CartItem[] => {
+    try {
+        const stored = localStorage.getItem('cartItems');
+        if (stored) {
+            return JSON.parse(stored);
+        }
+    } catch {
+        // If parsing fails, return empty
+    }
+    return [];
+};
+
+const saveCartToStorage = (items: CartItem[]) => {
+    try {
+        localStorage.setItem('cartItems', JSON.stringify(items));
+    } catch {
+        // Silently fail if localStorage is full
+    }
+};
+
 const initialState: CartState = {
-    items: [],
+    items: loadCartFromStorage(),
 };
 
 const cartSlice = createSlice({
@@ -31,6 +52,7 @@ const cartSlice = createSlice({
             } else {
                 state.items.push({ ...productToAdd, quantity: 1 });
             }
+            saveCartToStorage(state.items);
         },
         // NEW: Action to increase an item's quantity
         incrementQuantity: (state, action: PayloadAction<number>) => {
@@ -38,6 +60,7 @@ const cartSlice = createSlice({
             if (item) {
                 item.quantity++;
             }
+            saveCartToStorage(state.items);
         },
         // NEW: Action to decrease an item's quantity
         decrementQuantity: (state, action: PayloadAction<number>) => {
@@ -48,13 +71,16 @@ const cartSlice = createSlice({
                 // If quantity is 1, decrementing removes the item
                 state.items = state.items.filter(i => i.id !== action.payload);
             }
+            saveCartToStorage(state.items);
         },
         // NEW: Action to remove an item from the cart completely
         removeFromCart: (state, action: PayloadAction<number>) => {
             state.items = state.items.filter(item => item.id !== action.payload);
+            saveCartToStorage(state.items);
         },
         clearCart: (state) => {
             state.items = [];
+            saveCartToStorage(state.items);
         },
 
     },

@@ -1,11 +1,11 @@
 // src/components/shared/Header.tsx
 
-import { ShoppingCart, User, LogOut, Menu, Coffee } from 'lucide-react';
+import { ShoppingCart, User, Menu, Coffee } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { selectTotalCartItems } from '@/features/cart/cartSlice';
-import { selectIsAuthenticated, logOut } from '@/features/auth/authSlice';
+import { selectIsAuthenticated, selectUsername } from '@/features/auth/authSlice';
 import { Button } from '../ui/button';
 import {
     Sheet,
@@ -17,7 +17,7 @@ import {
 export function Header() {
     const totalItems = useSelector(selectTotalCartItems);
     const isAuthenticated = useSelector(selectIsAuthenticated);
-    const dispatch = useDispatch();
+    const username = useSelector(selectUsername);
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -29,12 +29,6 @@ export function Header() {
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
-
-    const handleLogout = () => {
-        dispatch(logOut());
-        setMobileMenuOpen(false);
-        navigate('/login');
-    };
 
     const navLinks = [
         { to: '/products', label: 'Shop' },
@@ -83,6 +77,37 @@ export function Header() {
                                             </Link>
                                         </SheetClose>
                                     ))}
+
+                                    {/* Mobile: Profile/Login link */}
+                                    <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
+                                        {isAuthenticated ? (
+                                            <SheetClose asChild>
+                                                <Link
+                                                    to="/profile"
+                                                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-3 ${
+                                                        isActive('/profile')
+                                                            ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                                                            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
+                                                    }`}
+                                                >
+                                                    <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center">
+                                                        <User className="h-3.5 w-3.5 text-white" />
+                                                    </div>
+                                                    {username || 'My Profile'}
+                                                </Link>
+                                            </SheetClose>
+                                        ) : (
+                                            <SheetClose asChild>
+                                                <Link
+                                                    to="/login"
+                                                    className="px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)] transition-all duration-200 flex items-center gap-3"
+                                                >
+                                                    <User className="h-4 w-4" />
+                                                    Login
+                                                </Link>
+                                            </SheetClose>
+                                        )}
+                                    </div>
                                 </nav>
                             </SheetContent>
                         </Sheet>
@@ -119,15 +144,22 @@ export function Header() {
                 {/* Right: Action Icons */}
                 <div className="flex items-center gap-2">
                     {isAuthenticated ? (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleLogout}
-                            aria-label="Logout"
-                            className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] rounded-full w-9 h-9"
+                        <Link
+                            to="/profile"
+                            aria-label="Profile"
+                            className={`relative flex items-center gap-2 transition-all duration-200 p-1.5 pr-3 rounded-full ${
+                                isActive('/profile')
+                                    ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)]'
+                            }`}
                         >
-                            <LogOut className="h-[18px] w-[18px]" />
-                        </Button>
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center">
+                                <User className="h-3.5 w-3.5 text-white" />
+                            </div>
+                            <span className="hidden sm:block text-[13px] font-medium truncate max-w-[80px]">
+                                {username || 'Profile'}
+                            </span>
+                        </Link>
                     ) : (
                         <Link
                             to="/login"

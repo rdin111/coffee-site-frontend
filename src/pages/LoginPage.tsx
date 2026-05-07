@@ -1,8 +1,18 @@
 // src/pages/LoginPage.tsx
 import { LoginForm } from "@/features/auth/LoginForm";
 import { Terminal } from "lucide-react";
+import { useSelector } from "react-redux";
+import { selectIsAuthenticated } from "@/features/auth/authSlice";
+import { Navigate } from "react-router-dom";
 
 export function LoginPage() {
+    const isAuthenticated = useSelector(selectIsAuthenticated);
+
+    // If the user is already logged in, redirect to profile
+    if (isAuthenticated) {
+        return <Navigate to="/profile" replace />;
+    }
+
     return (
         <div className="min-h-[80vh] flex items-center justify-center pt-24 px-6">
             <div className="mx-auto w-full max-w-[400px] space-y-6 animate-fade-in-up">

@@ -13,6 +13,7 @@ import { OurStoryPage } from "@/pages/OurStoryPage"; // <-- IMPORT
 import { ContactPage } from "@/pages/ContactPage"; // <-- IMPORT
 import { PourOverGuidePage } from "@/pages/PourOverGuidePage"; // <-- IMPORT
 import { FrenchPressGuidePage } from "@/pages/FrenchPressGuidePage"; // <-- IMPORT
+import { ProfilePage } from "@/pages/ProfilePage";
 
 
 
@@ -35,6 +36,7 @@ const AppRoutes = () => {
                 <Route element={<ProtectedRoute />}>
                     <Route path="cart" element={<CartPage />} />
                     <Route path="checkout" element={<CheckoutPage />} />
+                    <Route path="profile" element={<ProfilePage />} />
                 </Route>
             </Route>
         </Routes>
