@@ -1,7 +1,7 @@
 // src/components/shared/Header.tsx
 
 import { ShoppingCart, User, Menu, Coffee } from 'lucide-react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { selectTotalCartItems } from '@/features/cart/cartSlice';
@@ -18,7 +18,7 @@ export function Header() {
     const totalItems = useSelector(selectTotalCartItems);
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const username = useSelector(selectUsername);
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const location = useLocation();
 
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -40,11 +40,10 @@ export function Header() {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
-                scrolled
-                    ? 'bg-[var(--color-background)]/95 backdrop-blur-xl border-b border-[var(--color-border)] py-3'
-                    : 'bg-transparent py-5'
-            }`}
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${scrolled
+                ? 'bg-[var(--color-background)]/95 backdrop-blur-xl border-b border-[var(--color-border)] py-3'
+                : 'bg-transparent py-5'
+                }`}
         >
             <div className="max-w-7xl mx-auto px-6 lg:px-8 flex justify-between items-center">
                 {/* Left: Mobile menu + Logo */}
@@ -67,11 +66,10 @@ export function Header() {
                                         <SheetClose asChild key={link.to}>
                                             <Link
                                                 to={link.to}
-                                                className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
-                                                    isActive(link.to)
-                                                        ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
-                                                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
-                                                }`}
+                                                className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isActive(link.to)
+                                                    ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                                                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
+                                                    }`}
                                             >
                                                 {link.label}
                                             </Link>
@@ -84,11 +82,10 @@ export function Header() {
                                             <SheetClose asChild>
                                                 <Link
                                                     to="/profile"
-                                                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-3 ${
-                                                        isActive('/profile')
-                                                            ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
-                                                            : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
-                                                    }`}
+                                                    className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 flex items-center gap-3 ${isActive('/profile')
+                                                        ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                                                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
+                                                        }`}
                                                 >
                                                     <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center">
                                                         <User className="h-3.5 w-3.5 text-white" />
@@ -130,11 +127,10 @@ export function Header() {
                         <Link
                             key={link.to}
                             to={link.to}
-                            className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300 ${
-                                isActive(link.to)
-                                    ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20'
-                                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
-                            }`}
+                            className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300 ${isActive(link.to)
+                                ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20'
+                                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
+                                }`}
                         >
                             {link.label}
                         </Link>
@@ -147,11 +143,10 @@ export function Header() {
                         <Link
                             to="/profile"
                             aria-label="Profile"
-                            className={`relative flex items-center gap-2 transition-all duration-200 p-1.5 pr-3 rounded-full ${
-                                isActive('/profile')
-                                    ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
-                                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)]'
-                            }`}
+                            className={`relative flex items-center gap-2 transition-all duration-200 p-1.5 pr-3 rounded-full ${isActive('/profile')
+                                ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                                : 'text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)]'
+                                }`}
                         >
                             <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center">
                                 <User className="h-3.5 w-3.5 text-white" />
