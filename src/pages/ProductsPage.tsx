@@ -5,7 +5,8 @@ import { ProductCard } from '../components/shared/ProductCard';
 import { ProductPagination } from '../components/shared/ProductPagination';
 import { Input } from "@/components/ui/input";
 import { useDebounce } from '@/hooks/useDebounce';
-import { Loader2, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
+import { ProductSkeleton } from '../components/shared/ProductSkeleton';
 
 export function ProductsPage() {
     const [page, setPage] = useState(0);
@@ -35,17 +36,27 @@ export function ProductsPage() {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center pt-24">
-                <div className="text-center">
-                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--color-primary)] mb-6" />
-                    {isSlowLoading ? (
-                        <div className="space-y-2">
-                            <h2 className="text-lg font-semibold font-serif">Waking up the roaster...</h2>
-                            <p className="text-sm text-[var(--color-text-muted)] font-sans">Our free-tier server is starting up. Please wait a moment!</p>
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-20">
+                <div className="mb-12 animate-fade-in-up">
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                        <div>
+                            <div className="h-3 w-20 bg-[var(--color-surface-elevated)] rounded-sm mb-4 shimmer" />
+                            <div className="h-10 w-48 md:w-64 bg-[var(--color-surface-elevated)] rounded-md shimmer" />
                         </div>
-                    ) : (
-                        <h2 className="text-lg font-semibold font-serif">Loading Products...</h2>
-                    )}
+                        <div className="w-full max-w-sm h-11 bg-[var(--color-surface-elevated)] rounded-full shimmer" />
+                    </div>
+                    <div className="section-divider mt-8" />
+                </div>
+                
+                {isSlowLoading && (
+                    <div className="text-center mb-12 animate-fade-in">
+                        <h2 className="text-lg font-semibold font-serif text-[var(--color-primary)]">Waking up the roaster...</h2>
+                        <p className="text-sm text-[var(--color-text-muted)] font-sans">Our free-tier server is starting up. Please wait a moment!</p>
+                    </div>
+                )}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {[1, 2, 3, 4, 5, 6].map(n => <ProductSkeleton key={n} />)}
                 </div>
             </div>
         );
@@ -113,6 +124,7 @@ export function ProductsPage() {
                     totalPages={data.totalPages}
                     setPage={setPage}
                     isPlaceholderData={isPlaceholderData}
+                    keyword={debouncedKeyword}
                 />
             </div>
         </div>

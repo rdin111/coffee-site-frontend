@@ -2,11 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/shared/ProductCard";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchProducts } from "@/api/products";
 import { Link } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
-import { Loader2, ArrowRight, ChevronRight } from "lucide-react";
+import { ArrowRight, ChevronRight } from "lucide-react";
+import { ProductSkeleton } from "@/components/shared/ProductSkeleton";
 
 // Simple hook to detect when an element is in the viewport
 function useInView(threshold = 0.1) {
@@ -31,25 +32,20 @@ function useInView(threshold = 0.1) {
 }
 
 export function HomePage() {
-    const [isSlowLoading, setIsSlowLoading] = useState(false);
+    const queryClient = useQueryClient();
+
+    const prefetchProducts = () => {
+        queryClient.prefetchQuery({
+            queryKey: ['products', 0, ''],
+            queryFn: () => fetchProducts({ page: 0, keyword: '' }),
+        });
+    };
 
     const { data: productsData, isLoading, isError } = useQuery({
         queryKey: ['featured-products'],
         queryFn: () => fetchProducts({ page: 0, size: 3 }),
         retry: 2,
     });
-
-    useEffect(() => {
-        let timer: NodeJS.Timeout;
-        if (isLoading) {
-            timer = setTimeout(() => {
-                setIsSlowLoading(true);
-            }, 3000);
-        } else {
-            setIsSlowLoading(false);
-        }
-        return () => clearTimeout(timer);
-    }, [isLoading]);
 
     const featured = useInView();
     const guides = useInView();
@@ -62,7 +58,7 @@ export function HomePage() {
                 {/* Background image with overlay */}
                 <div className="absolute inset-0">
                     <img
-                        src="/images/coffeebean.jpg"
+                        src="/images/coffeebean.webp"
                         alt="Premium coffee beans"
                         className="w-full h-full object-cover"
                     />
@@ -84,7 +80,7 @@ export function HomePage() {
                         Discover our commitment to perfect blends — from the finest single-origin beans, ethically sourced and freshly roasted to your doorstep.
                     </p>
                     <div className="animate-fade-in-up delay-300 flex flex-col sm:flex-row items-center justify-center gap-4">
-                        <Button asChild size="lg" className="btn-primary rounded-full px-8 py-6 text-sm font-medium tracking-wide shadow-lg shadow-[var(--color-primary)]/20">
+                        <Button asChild size="lg" onMouseEnter={prefetchProducts} className="btn-primary rounded-full px-8 py-6 text-sm font-medium tracking-wide shadow-lg shadow-[var(--color-primary)]/20">
                             <Link to="/products">
                                 Shop Now
                                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -121,16 +117,10 @@ export function HomePage() {
                 </div>
 
                 {isLoading ? (
-                    <div className="text-center py-20">
-                        <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--color-primary)] mb-6" />
-                        {isSlowLoading ? (
-                            <div className="space-y-2">
-                                <h3 className="text-lg font-semibold font-serif">Waking up the roaster...</h3>
-                                <p className="text-sm text-[var(--color-text-muted)] font-sans">Our server is starting up. Please wait a moment!</p>
-                            </div>
-                        ) : (
-                            <h3 className="text-lg font-semibold font-serif">Loading Featured Coffee...</h3>
-                        )}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        {[1, 2, 3].map((n) => (
+                            <ProductSkeleton key={n} />
+                        ))}
                     </div>
                 ) : isError || !productsData ? (
                     <div className="text-center py-16">
@@ -202,8 +192,10 @@ export function HomePage() {
                             </div>
                             <div className="img-zoom rounded-2xl overflow-hidden aspect-[4/3]">
                                 <img
-                                    src="/images/Pour-Over.jpg"
+                                    src="/images/Pour-Over.webp"
                                     alt="Pour-over coffee setup"
+                                    loading="lazy"
+                                    decoding="async"
                                     className="w-full h-full object-cover"
                                 />
                             </div>
@@ -213,8 +205,10 @@ export function HomePage() {
                         <div className={`grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center transition-all duration-700 ${guides.isInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`} style={{ transitionDelay: '400ms' }}>
                             <div className="img-zoom rounded-2xl overflow-hidden aspect-[4/3] lg:order-first">
                                 <img
-                                    src="/images/French-Press.jpg"
+                                    src="/images/French-Press.webp"
                                     alt="French press coffee maker"
+                                    loading="lazy"
+                                    decoding="async"
                                     className="w-full h-full object-cover"
                                 />
                             </div>
@@ -245,8 +239,10 @@ export function HomePage() {
             >
                 <div className="relative rounded-3xl overflow-hidden">
                     <img
-                        src="/images/storybeans.jpg"
+                        src="/images/storybeans.webp"
                         alt="Coffee beans being roasted"
+                        loading="lazy"
+                        decoding="async"
                         className="w-full h-80 md:h-96 object-cover"
                     />
                     <div className="absolute inset-0 bg-gradient-to-r from-[var(--color-background)]/90 via-[var(--color-background)]/70 to-transparent" />
@@ -258,7 +254,7 @@ export function HomePage() {
                             <p className="text-[var(--color-text-secondary)] mb-8 font-sans">
                                 Explore our curated selection of single-origin coffees from around the world.
                             </p>
-                            <Button asChild size="lg" className="btn-primary rounded-full px-8 py-6 text-sm font-medium shadow-lg shadow-[var(--color-primary)]/20">
+                            <Button asChild size="lg" onMouseEnter={prefetchProducts} className="btn-primary rounded-full px-8 py-6 text-sm font-medium shadow-lg shadow-[var(--color-primary)]/20">
                                 <Link to="/products">
                                     Explore Collection
                                     <ArrowRight className="ml-2 h-4 w-4" />

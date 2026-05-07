@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart } from '@/features/cart/cartSlice';
 import toast from 'react-hot-toast';
 import { ShoppingBag } from 'lucide-react';
+import React from 'react';
 
 interface Product {
     id: number;
@@ -15,7 +16,7 @@ interface ProductCardProps {
     product: Product;
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export const ProductCard = React.memo(function ProductCard({ product }: ProductCardProps) {
     const dispatch = useDispatch();
 
     const handleAddToCart = () => {
@@ -30,6 +31,10 @@ export function ProductCard({ product }: ProductCardProps) {
                 <img
                     src={product.imageUrl || 'https://placehold.co/400'}
                     alt={product.name}
+                    loading="lazy"
+                    decoding="async"
+                    width={400}
+                    height={400}
                     className="object-cover w-full h-full transition-transform duration-700 ease-out group-hover:scale-110"
                 />
                 {/* Gradient overlay */}
@@ -63,4 +68,4 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
         </div>
     );
-}
+});

@@ -1,13 +1,17 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { fetchProducts } from '../../api/products';
 
 interface ProductPaginationProps {
     page: number;
     totalPages: number;
     setPage: (page: number) => void;
     isPlaceholderData?: boolean;
+    keyword: string;
 }
 
-export function ProductPagination({ page, totalPages, setPage, isPlaceholderData }: ProductPaginationProps) {
+export function ProductPagination({ page, totalPages, setPage, isPlaceholderData, keyword }: ProductPaginationProps) {
+    const queryClient = useQueryClient();
 
     const handlePrevious = () => {
         if (!isPlaceholderData) {
@@ -18,6 +22,24 @@ export function ProductPagination({ page, totalPages, setPage, isPlaceholderData
     const handleNext = () => {
         if (!isPlaceholderData) {
             setPage(Math.min(totalPages - 1, page + 1));
+        }
+    };
+
+    const prefetchNext = () => {
+        if (page < totalPages - 1 && !isPlaceholderData) {
+            queryClient.prefetchQuery({
+                queryKey: ['products', page + 1, keyword],
+                queryFn: () => fetchProducts({ page: page + 1, keyword }),
+            });
+        }
+    };
+
+    const prefetchPrev = () => {
+        if (page > 0 && !isPlaceholderData) {
+            queryClient.prefetchQuery({
+                queryKey: ['products', page - 1, keyword],
+                queryFn: () => fetchProducts({ page: page - 1, keyword }),
+            });
         }
     };
 
@@ -32,6 +54,7 @@ export function ProductPagination({ page, totalPages, setPage, isPlaceholderData
         <div className="flex items-center justify-center gap-4">
             <button
                 onClick={handlePrevious}
+                onMouseEnter={prefetchPrev}
                 disabled={isPrevDisabled}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border font-sans ${
                     isPrevDisabled
@@ -49,6 +72,7 @@ export function ProductPagination({ page, totalPages, setPage, isPlaceholderData
 
             <button
                 onClick={handleNext}
+                onMouseEnter={prefetchNext}
                 disabled={isNextDisabled}
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 border font-sans ${
                     isNextDisabled
