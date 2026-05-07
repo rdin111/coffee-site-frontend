@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useForm } from 'react-hook-form';
@@ -10,67 +9,66 @@ import { useDispatch } from 'react-redux';
 import { setCredentials } from './authSlice';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { Coffee } from 'lucide-react';
 
 export function LoginForm() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
-        resolver: zodResolver(loginSchema), // Use Zod for validation
+        resolver: zodResolver(loginSchema),
     });
 
-    // useMutation is the React Query hook for POST/PUT/DELETE requests
     const mutation = useMutation({
         mutationFn: loginUser,
         onSuccess: (token) => {
-            // On successful API call, dispatch the credentials to Redux
             dispatch(setCredentials({ token }));
             toast.success("Login successful!");
-            // Redirect the user to the homepage
             navigate('/');
         },
         onError: (error) => {
-            // On error, show a toast notification
             toast.error(`Login failed: ${error.message}`);
         }
     });
 
-    // This function is called when the form is submitted and valid
     const onSubmit = (data: LoginData) => {
-        mutation.mutate(data); // Execute the mutation
+        mutation.mutate(data);
     };
 
+    const inputClasses = "bg-[var(--color-surface-elevated)] border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] rounded-xl h-12 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20";
+
     return (
-        <Card>
-            <CardHeader>
-                <CardTitle>Login to your account</CardTitle>
-                <CardDescription>
-                    Enter your username and password below to login.
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {/* We use handleSubmit to wrap our onSubmit function */}
-                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid gap-2">
-                        <Label htmlFor="username">Username</Label>
-                        {/* We use register to link the input to our form state */}
-                        <Input id="username" {...register("username")} placeholder="testuser" />
-                        {errors.username && <p className="text-red-500 text-xs">{errors.username.message}</p>}
-                    </div>
-                    <div className="grid gap-2">
-                        <Label htmlFor="password">Password</Label>
-                        <Input id="password" type="password" {...register("password")} />
-                        {errors.password && <p className="text-red-500 text-xs">{errors.password.message}</p>}
-                    </div>
-                    <Button type="submit" className="w-full" disabled={mutation.isPending}>
-                        {mutation.isPending ? "Logging in..." : "Login"}
-                    </Button>
-                </form>
-                <div className="mt-4 text-center text-sm">
-                    Don't have an account?{" "}
-                    <Link to="/register" className="underline">Sign up</Link>
+        <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-8">
+            <div className="text-center mb-8">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center mx-auto mb-4">
+                    <Coffee className="h-6 w-6 text-white" />
                 </div>
-            </CardContent>
-        </Card>
+                <h2 className="text-2xl font-bold">Welcome back</h2>
+                <p className="text-sm text-[var(--color-text-muted)] mt-1 font-sans">
+                    Enter your credentials to access your account
+                </p>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                <div className="space-y-2">
+                    <Label htmlFor="username" className="text-sm text-[var(--color-text-secondary)] font-sans">Username</Label>
+                    <Input id="username" {...register("username")} placeholder="testuser" className={inputClasses} />
+                    {errors.username && <p className="text-[var(--color-error)] text-xs font-sans">{errors.username.message}</p>}
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="password" className="text-sm text-[var(--color-text-secondary)] font-sans">Password</Label>
+                    <Input id="password" type="password" {...register("password")} className={inputClasses} />
+                    {errors.password && <p className="text-[var(--color-error)] text-xs font-sans">{errors.password.message}</p>}
+                </div>
+                <Button type="submit" className="w-full btn-primary rounded-xl py-6 text-sm font-medium" disabled={mutation.isPending}>
+                    {mutation.isPending ? "Logging in..." : "Login"}
+                </Button>
+            </form>
+
+            <div className="mt-6 text-center text-sm font-sans">
+                <span className="text-[var(--color-text-muted)]">Don't have an account? </span>
+                <Link to="/register" className="text-[var(--color-primary)] hover:underline font-medium">Sign up</Link>
+            </div>
+        </div>
     );
 }

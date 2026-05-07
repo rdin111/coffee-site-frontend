@@ -5,7 +5,7 @@ import { ProductCard } from '../components/shared/ProductCard';
 import { ProductPagination } from '../components/shared/ProductPagination';
 import { Input } from "@/components/ui/input";
 import { useDebounce } from '@/hooks/useDebounce';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Search } from 'lucide-react';
 
 export function ProductsPage() {
     const [page, setPage] = useState(0);
@@ -23,71 +23,91 @@ export function ProductsPage() {
     useEffect(() => {
         let timer: NodeJS.Timeout;
         if (isLoading) {
-            // After 3 seconds, assume it's a cold start
             timer = setTimeout(() => {
                 setIsSlowLoading(true);
             }, 3000);
         } else {
-            // If loading finishes, cancel the timer and hide the message
             setIsSlowLoading(false);
         }
-
-        // Cleanup function to clear the timer if the component unmounts
         return () => clearTimeout(timer);
-
     }, [isLoading]);
 
 
     if (isLoading) {
         return (
-            <div className="text-center py-20">
-                <Loader2 className="mx-auto h-12 w-12 animate-spin text-[#D37A54] mb-4" />
-                {isSlowLoading ? (
-                    <>
-                        <h2 className="text-xl font-semibold">Waking up the roaster...</h2>
-                        <p className="text-muted-foreground">Our free-tier server is starting up. Please wait a moment!</p>
-                    </>
-                ) : (
-                    <h2 className="text-xl font-semibold">Loading Products...</h2>
-                )}
+            <div className="min-h-screen flex items-center justify-center pt-24">
+                <div className="text-center">
+                    <Loader2 className="mx-auto h-8 w-8 animate-spin text-[var(--color-primary)] mb-6" />
+                    {isSlowLoading ? (
+                        <div className="space-y-2">
+                            <h2 className="text-lg font-semibold font-serif">Waking up the roaster...</h2>
+                            <p className="text-sm text-[var(--color-text-muted)] font-sans">Our free-tier server is starting up. Please wait a moment!</p>
+                        </div>
+                    ) : (
+                        <h2 className="text-lg font-semibold font-serif">Loading Products...</h2>
+                    )}
+                </div>
             </div>
         );
     }
 
     if (isError) {
-        return <div className="text-center text-red-500">Error fetching products: {error.message}</div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center pt-24">
+                <div className="text-center text-[var(--color-error)]">
+                    Error fetching products: {error.message}
+                </div>
+            </div>
+        );
     }
 
     if (!data) {
-        return <div className="text-center">No products found.</div>;
+        return (
+            <div className="min-h-screen flex items-center justify-center pt-24">
+                <div className="text-center text-[var(--color-text-muted)]">No products found.</div>
+            </div>
+        );
     }
 
     return (
-        <div>
-            <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold">Shop All Coffee</h1>
-                <div className="w-full max-w-xs">
-                    <Input
-                        placeholder="Search for a coffee..."
-                        value={keyword}
-                        onChange={(e) => setKeyword(e.target.value)}
-                    />
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-20">
+            {/* Page Header */}
+            <div className="mb-12 animate-fade-in-up">
+                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                    <div>
+                        <span className="text-xs font-semibold uppercase tracking-[0.25em] text-[var(--color-primary)] mb-3 block font-sans">
+                            Collection
+                        </span>
+                        <h1 className="text-4xl md:text-5xl font-bold">Shop All Coffee</h1>
+                    </div>
+                    <div className="relative w-full max-w-sm">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[var(--color-text-muted)]" />
+                        <Input
+                            placeholder="Search for a coffee..."
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            className="pl-10 bg-[var(--color-surface)] border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] rounded-full h-11 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20"
+                        />
+                    </div>
                 </div>
+                <div className="section-divider mt-8" />
             </div>
 
-            {data.content.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {/* Products Grid */}
+            {data.content && data.content.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fade-in-up delay-200">
                     {data.content.map((product: any) => (
                         <ProductCard key={product.id} product={product} />
                     ))}
                 </div>
             ) : (
-                <div className="text-center py-16 text-muted-foreground">
+                <div className="text-center py-20 text-[var(--color-text-muted)] font-sans">
                     No products found for "{debouncedKeyword}". Try a different search.
                 </div>
             )}
 
-            <div className="mt-12">
+            {/* Pagination */}
+            <div className="mt-16">
                 <ProductPagination
                     page={page}
                     totalPages={data.totalPages}

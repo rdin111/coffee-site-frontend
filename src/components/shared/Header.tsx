@@ -1,9 +1,9 @@
 // src/components/shared/Header.tsx
 
-import { ShoppingCart, User, LogOut, Menu } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ShoppingCart, User, LogOut, Menu, Coffee } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { selectTotalCartItems } from '@/features/cart/cartSlice';
 import { selectIsAuthenticated, logOut } from '@/features/auth/authSlice';
 import { Button } from '../ui/button';
@@ -19,82 +19,138 @@ export function Header() {
     const isAuthenticated = useSelector(selectIsAuthenticated);
     const dispatch = useDispatch();
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => setScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
 
     const handleLogout = () => {
         dispatch(logOut());
-        setMobileMenuOpen(false); // Close menu on logout
+        setMobileMenuOpen(false);
         navigate('/login');
     };
 
-    return (
-        <header className="border-b sticky top-0 bg-white z-10">
-            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+    const navLinks = [
+        { to: '/products', label: 'Shop' },
+        { to: '/our-story', label: 'Our Story' },
+        { to: '/contact', label: 'Contact' },
+    ];
 
+    const isActive = (path: string) => location.pathname === path;
+
+    return (
+        <header
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+                scrolled
+                    ? 'bg-[var(--color-background)]/95 backdrop-blur-xl border-b border-[var(--color-border)] py-3'
+                    : 'bg-transparent py-5'
+            }`}
+        >
+            <div className="max-w-7xl mx-auto px-6 lg:px-8 flex justify-between items-center">
+                {/* Left: Mobile menu + Logo */}
                 <div className="flex items-center gap-4">
-                    {/* --- HAMBURGER MENU (MOBILE ONLY) --- */}
+                    {/* Hamburger Menu (Mobile Only) */}
                     <div className="md:hidden">
                         <Sheet open={isMobileMenuOpen} onOpenChange={setMobileMenuOpen}>
                             <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" aria-label="Open menu">
-                                    <Menu className="h-6 w-6" />
+                                <Button variant="ghost" size="icon" aria-label="Open menu" className="text-[var(--color-text-primary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)]">
+                                    <Menu className="h-5 w-5" />
                                 </Button>
                             </SheetTrigger>
-                            {/* This SheetContent now slides from the LEFT */}
-                            <SheetContent side="left" className="w-[300px]">
-                                <nav className="flex flex-col gap-6 text-lg font-medium mt-8">
-                                    <SheetClose asChild>
-                                        <Link to="/products">Shop</Link>
-                                    </SheetClose>
-                                    <SheetClose asChild>
-                                        <Link to="/our-story">Our Story</Link>
-                                    </SheetClose>
-                                    <SheetClose asChild>
-                                        <Link to="/contact">Contact</Link>
-                                    </SheetClose>
+                            <SheetContent side="left" className="w-[300px] bg-[var(--color-surface)] border-r border-[var(--color-border)]">
+                                <div className="flex items-center gap-2 mb-10 mt-4">
+                                    <Coffee className="h-5 w-5 text-[var(--color-primary)]" />
+                                    <span className="font-serif text-xl font-bold text-[var(--color-text-primary)]">The Grind</span>
+                                </div>
+                                <nav className="flex flex-col gap-1">
+                                    {navLinks.map((link) => (
+                                        <SheetClose asChild key={link.to}>
+                                            <Link
+                                                to={link.to}
+                                                className={`px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${
+                                                    isActive(link.to)
+                                                        ? 'bg-[var(--color-primary-muted)] text-[var(--color-primary)]'
+                                                        : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
+                                                }`}
+                                            >
+                                                {link.label}
+                                            </Link>
+                                        </SheetClose>
+                                    ))}
                                 </nav>
                             </SheetContent>
                         </Sheet>
                     </div>
 
-                    {/* --- LOGO --- */}
-                    <Link to="/" className="text-xl font-bold">
-                        The Grind
+                    {/* Logo */}
+                    <Link to="/" className="flex items-center gap-2.5 group">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-accent)] flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                            <Coffee className="h-4 w-4 text-white" />
+                        </div>
+                        <span className="font-serif text-xl font-bold tracking-tight text-[var(--color-text-primary)]">
+                            The Grind
+                        </span>
                     </Link>
                 </div>
 
-                {/* --- DESKTOP NAVIGATION (DESKTOP ONLY) --- */}
-                {/* This nav is now hidden on mobile screens */}
-                <nav className="hidden md:flex gap-6">
-                    <Link to="/products" className="text-sm font-medium hover:text-orange-600 transition-colors">Shop</Link>
-                    <Link to="/our-story" className="text-sm font-medium hover:text-orange-600 transition-colors">Our Story</Link>
-                    <Link to="/contact" className="text-sm font-medium hover:text-orange-600 transition-colors">Contact</Link>
+                {/* Center: Desktop Navigation */}
+                <nav className="hidden md:flex items-center gap-1 bg-[var(--color-surface)]/50 backdrop-blur-sm rounded-full px-2 py-1.5 border border-[var(--color-border)]">
+                    {navLinks.map((link) => (
+                        <Link
+                            key={link.to}
+                            to={link.to}
+                            className={`px-4 py-1.5 rounded-full text-[13px] font-medium transition-all duration-300 ${
+                                isActive(link.to)
+                                    ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20'
+                                    : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-surface-elevated)]'
+                            }`}
+                        >
+                            {link.label}
+                        </Link>
+                    ))}
                 </nav>
 
-                {/* --- ICONS (ALWAYS VISIBLE) --- */}
-                {/* This div is no longer hidden on mobile, so the icons are always on the right */}
-                <div className="flex items-center gap-4">
+                {/* Right: Action Icons */}
+                <div className="flex items-center gap-2">
                     {isAuthenticated ? (
-                        <Button variant="ghost" size="icon" onClick={handleLogout} aria-label="Logout">
-                            <LogOut className="h-5 w-5" />
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={handleLogout}
+                            aria-label="Logout"
+                            className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface)] rounded-full w-9 h-9"
+                        >
+                            <LogOut className="h-[18px] w-[18px]" />
                         </Button>
                     ) : (
-                        <Link to="/login" aria-label="Login">
-                            <User className="h-5 w-5 cursor-pointer" />
+                        <Link
+                            to="/login"
+                            aria-label="Login"
+                            className="text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors duration-200 p-2 rounded-full hover:bg-[var(--color-surface)]"
+                        >
+                            <User className="h-[18px] w-[18px]" />
                         </Link>
                     )}
 
-                    <Link to="/cart" className="relative" aria-label="Shopping Cart">
-                        <ShoppingCart className="h-5 w-5 cursor-pointer" />
+                    <Link
+                        to="/cart"
+                        className="relative text-[var(--color-text-secondary)] hover:text-[var(--color-primary)] transition-colors duration-200 p-2 rounded-full hover:bg-[var(--color-surface)]"
+                        aria-label="Shopping Cart"
+                    >
+                        <ShoppingCart className="h-[18px] w-[18px]" />
                         {totalItems > 0 && (
-                            <span className="absolute -top-2 -right-2 bg-[#D37A54] text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-                {totalItems}
-              </span>
+                            <span className="absolute -top-0.5 -right-0.5 bg-[var(--color-primary)] text-white text-[10px] font-bold rounded-full h-4 w-4 flex items-center justify-center shadow-lg shadow-[var(--color-primary)]/30 animate-scale-in">
+                                {totalItems}
+                            </span>
                         )}
                     </Link>
                 </div>
-
             </div>
         </header>
     );

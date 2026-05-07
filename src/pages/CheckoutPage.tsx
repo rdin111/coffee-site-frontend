@@ -1,14 +1,13 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useSelector, useDispatch } from 'react-redux';
 import { selectCartItems, selectCartSubtotal, clearCart } from "@/features/cart/cartSlice";
 import { useMutation } from '@tanstack/react-query';
 import { placeOrder } from '@/api/orders';
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { CreditCard } from "lucide-react";
+import { CreditCard, Lock } from "lucide-react";
 
 export function CheckoutPage() {
     const cartItems = useSelector(selectCartItems);
@@ -16,124 +15,132 @@ export function CheckoutPage() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    // useMutation is the React Query hook for handling the order placement API call
     const mutation = useMutation({
         mutationFn: placeOrder,
         onSuccess: () => {
             toast.success("Order placed successfully!");
-            dispatch(clearCart()); // Clear the cart from Redux state after a successful order
-            navigate('/order-confirmation'); // Redirect the user to a success page
+            dispatch(clearCart());
+            navigate('/order-confirmation');
         },
         onError: (error) => {
-            // In a real app, you might check error.response.data for a more specific message
             toast.error(`Failed to place order: ${error.message}`);
         },
     });
 
     const handlePlaceOrder = () => {
-        // Check if there are items in the cart before proceeding
         if (cartItems.length === 0) {
             toast.error("Your cart is empty.");
             return;
         }
-
-        // Create the Data Transfer Object (DTO) that our backend API expects
         const orderDto = {
             items: cartItems.map(item => ({
                 productId: item.id,
                 quantity: item.quantity,
             })),
         };
-
-        // Trigger the API call
         mutation.mutate(orderDto);
     };
 
-    return (
-        <div className="max-w-6xl mx-auto py-8">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+    const inputClasses = "bg-[var(--color-surface-elevated)] border-[var(--color-border)] text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] rounded-xl h-12 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/20";
 
+    return (
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 pt-32 pb-20">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
                 {/* Left Side: Shipping Form */}
-                <div className="lg:col-span-2 space-y-6">
-                    <h1 className="text-2xl font-semibold">Shipping Information</h1>
-                    <Card>
-                        <CardContent className="p-6 space-y-4">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="first-name">First name</Label>
-                                    <Input id="first-name" placeholder="John" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="last-name">Last name</Label>
-                                    <Input id="last-name" placeholder="Doe" />
-                                </div>
+                <div className="lg:col-span-2 space-y-8 animate-fade-in-up">
+                    <div>
+                        <h1 className="text-3xl font-bold">Checkout</h1>
+                        <p className="text-[var(--color-text-muted)] mt-1 font-sans">Complete your order</p>
+                        <div className="section-divider mt-4" />
+                    </div>
+
+                    <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-6 md:p-8 space-y-6">
+                        <h2 className="text-lg font-semibold flex items-center gap-2">
+                            Shipping Information
+                        </h2>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                            <div className="space-y-2">
+                                <Label htmlFor="first-name" className="text-sm text-[var(--color-text-muted)] font-sans">First name</Label>
+                                <Input id="first-name" placeholder="John" className={inputClasses} />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="address">Address</Label>
-                                <Input id="address" placeholder="123 Main St" />
+                                <Label htmlFor="last-name" className="text-sm text-[var(--color-text-muted)] font-sans">Last name</Label>
+                                <Input id="last-name" placeholder="Doe" className={inputClasses} />
                             </div>
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                                <div className="space-y-2 sm:col-span-2">
-                                    <Label htmlFor="city">City</Label>
-                                    <Input id="city" placeholder="Anytown" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="zip">ZIP code</Label>
-                                    <Input id="zip" placeholder="12345" />
-                                </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="address" className="text-sm text-[var(--color-text-muted)] font-sans">Address</Label>
+                            <Input id="address" placeholder="123 Main St" className={inputClasses} />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                            <div className="space-y-2 sm:col-span-2">
+                                <Label htmlFor="city" className="text-sm text-[var(--color-text-muted)] font-sans">City</Label>
+                                <Input id="city" placeholder="Anytown" className={inputClasses} />
                             </div>
-                        </CardContent>
-                    </Card>
+                            <div className="space-y-2">
+                                <Label htmlFor="zip" className="text-sm text-[var(--color-text-muted)] font-sans">ZIP code</Label>
+                                <Input id="zip" placeholder="12345" className={inputClasses} />
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Right Side: Order Summary */}
-                <div className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Order Summary</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            {/* List of items in the cart */}
-                            <div className="space-y-4 max-h-60 overflow-y-auto">
-                                {cartItems.map(item => (
-                                    <div key={item.id} className="flex justify-between items-center text-sm">
-                                        <div className="flex items-center gap-4">
-                                            <img src={item.imageUrl || 'https://placehold.co/100'} alt={item.name} className="w-12 h-12 object-cover rounded-md" />
-                                            <div>
-                                                <p className="font-medium">{item.name}</p>
-                                                <p className="text-muted-foreground">Qty: {item.quantity}</p>
-                                            </div>
+                <div className="space-y-6 animate-fade-in-up delay-200">
+                    <div className="rounded-2xl bg-[var(--color-surface)] border border-[var(--color-border)] p-6 sticky top-28">
+                        <h2 className="text-lg font-semibold mb-6">Order Summary</h2>
+
+                        {/* List of items */}
+                        <div className="space-y-4 max-h-60 overflow-y-auto pr-2">
+                            {cartItems.map(item => (
+                                <div key={item.id} className="flex justify-between items-center text-sm">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0">
+                                            <img src={item.imageUrl || 'https://placehold.co/100'} alt={item.name} className="w-full h-full object-cover" />
                                         </div>
-                                        <p>${(item.price * item.quantity).toFixed(2)}</p>
+                                        <div>
+                                            <p className="font-medium text-sm font-sans">{item.name}</p>
+                                            <p className="text-xs text-[var(--color-text-muted)] font-sans">Qty: {item.quantity}</p>
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
+                                    <p className="font-medium font-sans">${(item.price * item.quantity).toFixed(2)}</p>
+                                </div>
+                            ))}
+                        </div>
 
-                            {/* Price calculation */}
-                            <div className="mt-4 pt-4 border-t space-y-2">
-                                <div className="flex justify-between text-sm">
-                                    <span>Subtotal</span>
-                                    <span>${subtotal.toFixed(2)}</span>
-                                </div>
-                                <div className="flex justify-between text-sm">
-                                    <span>Shipping</span>
-                                    <span className="text-muted-foreground">Free</span>
-                                </div>
-                                <div className="flex justify-between font-semibold text-lg mt-2 pt-2 border-t">
-                                    <span>Total</span>
-                                    <span>${subtotal.toFixed(2)}</span>
-                                </div>
+                        {/* Price calculation */}
+                        <div className="mt-6 pt-4 border-t border-[var(--color-border)] space-y-3">
+                            <div className="flex justify-between text-sm font-sans">
+                                <span className="text-[var(--color-text-muted)]">Subtotal</span>
+                                <span>${subtotal.toFixed(2)}</span>
                             </div>
+                            <div className="flex justify-between text-sm font-sans">
+                                <span className="text-[var(--color-text-muted)]">Shipping</span>
+                                <span className="text-[var(--color-success)] font-medium">Free</span>
+                            </div>
+                            <div className="flex justify-between font-semibold text-lg mt-2 pt-3 border-t border-[var(--color-border)]">
+                                <span>Total</span>
+                                <span>${subtotal.toFixed(2)}</span>
+                            </div>
+                        </div>
 
-                            {/* Place Order Button */}
-                            <Button onClick={handlePlaceOrder} disabled={mutation.isPending} className="w-full mt-4 bg-[#D37A54] hover:bg-[#b66a4a]">
-                                <CreditCard className="mr-2 h-4 w-4" />
-                                {mutation.isPending ? 'Placing Order...' : 'Place Order'}
-                            </Button>
-                        </CardContent>
-                    </Card>
+                        {/* Place Order Button */}
+                        <Button
+                            onClick={handlePlaceOrder}
+                            disabled={mutation.isPending}
+                            className="w-full btn-primary rounded-xl py-6 text-sm font-medium mt-6"
+                        >
+                            <Lock className="mr-2 h-4 w-4" />
+                            {mutation.isPending ? 'Placing Order...' : 'Place Order'}
+                        </Button>
+
+                        <p className="text-[10px] text-[var(--color-text-muted)] text-center mt-3 font-sans flex items-center justify-center gap-1">
+                            <Lock className="h-3 w-3" />
+                            Secure checkout powered by Stripe
+                        </p>
+                    </div>
                 </div>
-
             </div>
         </div>
     );
