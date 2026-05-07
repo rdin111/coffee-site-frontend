@@ -7,7 +7,7 @@ import { useMutation } from '@tanstack/react-query';
 import { placeOrder } from '@/api/orders';
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import { CreditCard, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 
 export function CheckoutPage() {
     const cartItems = useSelector(selectCartItems);
